@@ -17,16 +17,17 @@ app.use(requestIp.mw());
 app.use(express.static(path.join(__dirname, "../public"))); // serve static files
 
 // ✅ Admin credentials
-const ADMIN_USER = process.env.ADMIN_USER || "admin";
-const ADMIN_PASS = process.env.ADMIN_PASS || "12345";
+const ADMIN_USER = process.env.ADMIN_USER;
+const ADMIN_PASS = process.env.ADMIN_PASS;
 
 // ✅ MySQL Connection
 const db = mysql.createConnection({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "070701",
-  database: process.env.DB_NAME || "portfolio_db",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
+
 
 db.connect((err) => {
   if (err) console.error("❌ Database connection failed:", err);
@@ -131,3 +132,4 @@ app.get("/blog", (req, res) => {
 --------------------------------*/
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+
