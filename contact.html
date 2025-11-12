@@ -9,6 +9,7 @@
     :root {
       --primary-color: #00ff7f;
       --text-color: #fff;
+      --card-bg: rgba(255, 255, 255, 0.1);
     }
 
     body {
@@ -21,7 +22,7 @@
       overflow-x: hidden;
     }
 
-    /* Overlay for text visibility */
+    /* Overlay for readability */
     body::before {
       content: "";
       position: fixed;
@@ -68,7 +69,6 @@
       color: var(--primary-color);
     }
 
-    /* ===== CONTACT SECTION ===== */
     #contact {
       padding: 6rem 1rem 4rem;
       min-height: 100vh;
@@ -94,7 +94,7 @@
     }
 
     form {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--card-bg);
       backdrop-filter: blur(8px);
       padding: 2rem;
       border-radius: 12px;
@@ -103,7 +103,13 @@
       flex-direction: column;
       gap: 1rem;
       width: 90%;
-      max-width: 500px;
+      max-width: 550px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     input, textarea {
@@ -115,6 +121,7 @@
       color: white;
       outline: none;
       transition: background 0.3s ease;
+      flex: 1;
     }
 
     input::placeholder, textarea::placeholder {
@@ -140,6 +147,12 @@
     button:hover {
       background: #02cc65;
       transform: scale(1.03);
+    }
+
+    #responseMessage {
+      margin-top: 1rem;
+      font-weight: 600;
+      text-align: center;
     }
 
     .contact-info {
@@ -183,17 +196,10 @@
     }
 
     @media (max-width: 768px) {
-      #contact h2 {
-        font-size: 2rem;
-      }
-      header {
-        flex-direction: column;
-      }
-      nav {
-        margin-top: 10px;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
+      #contact h2 { font-size: 2rem; }
+      header { flex-direction: column; }
+      nav { margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+      .form-row { flex-direction: column; }
     }
   </style>
 </head>
@@ -215,12 +221,16 @@
     <p>Got a project, collaboration idea, or opportunity in mind? I’d love to hear from you. Drop a message below and I’ll get back soon.</p>
 
     <form id="contactForm">
-      <input type="text" id="name" name="name" placeholder="Your Name" required />
-      <input type="email" id="email" name="email" placeholder="Your Email" required />
-      <input type="text" id="subject" name="subject" placeholder="Subject (optional)" />
-      <textarea id="message" name="message" rows="5" placeholder="Your Message" required></textarea>
+      <div class="form-row">
+        <input type="text" id="firstName" placeholder="First Name *" required />
+        <input type="text" id="lastName" placeholder="Last Name *" required />
+      </div>
+      <input type="email" id="email" placeholder="Your Email *" required />
+      <input type="text" id="subject" placeholder="Subject (optional)" />
+      <textarea id="message" rows="5" placeholder="Your Message *" required></textarea>
       <button type="submit">Send Message</button>
     </form>
+    <div id="responseMessage"></div>
 
     <div class="contact-info">
       <p>Email: <a href="mailto:gaurakansha7394@gmail.com">gaurakansha7394@gmail.com</a></p>
@@ -232,15 +242,57 @@
   </section>
 
   <footer>
-    <p>© 2025 Akansha Gaur | All rights reserved. </p>
+    <p>© 2025 Akansha Gaur | All rights reserved.</p>
   </footer>
 
   <script>
-    document.getElementById("contactForm").addEventListener("submit", function(e) {
+    document.getElementById("contactForm").addEventListener("submit", async function(e) {
       e.preventDefault();
-      alert("Thank you for your message! I'll reply soon.");
-      this.reset();
+
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName = document.getElementById("lastName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const subject = document.getElementById("subject").value.trim();
+      const message = document.getElementById("message").value.trim();
+      const responseBox = document.getElementById("responseMessage");
+
+      if (!firstName || !lastName || !email || !message) {
+        responseBox.textContent = "❌ Please fill all required fields!";
+        responseBox.style.color = "red";
+        return;
+      }
+
+      try {
+        // Replace URL with your server endpoint
+        const res = await fetch("http://localhost:5000/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: `${firstName} ${lastName}`,
+            email,
+            subject,
+            message
+          }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          responseBox.textContent = "✅ Message sent successfully!";
+          responseBox.style.color = "lime";
+          this.reset();
+        } else {
+          responseBox.textContent = "❌ Error sending message!";
+          responseBox.style.color = "red";
+        }
+      } catch (err) {
+        console.error(err);
+        responseBox.textContent = "⚠️ Server error. Please try again later.";
+        responseBox.style.color = "orange";
+      }
     });
   </script>
 </body>
 </html>
+
+
